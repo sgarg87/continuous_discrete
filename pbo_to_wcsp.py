@@ -52,23 +52,23 @@ class PseudoBooleanOptimizationToWeightedConstraintSatisfactionProblem:
         self.min_degree_polynomial = 0.0
         self.max_degree_polynomial = 4.0
 
-        self.min_coefficient = -1.0
-        self.max_coefficient = 1.0
+        self.min_coefficient = -10000.0
+        self.max_coefficient = 10000.0
 
-        self.num_var = 4
-        self.prob_var_in_expression = 0.3
+        self.num_var = 5
+        self.prob_var_in_expression = 0.2
         self.max_vars_per_expression = self.num_var
 
         self.function_choices =\
             np.array(
                 [
                     self.poly,
-                    self.sin,
-                    self.cos,
+                    # self.sin,
+                    # self.cos,
                 ]
             )
 
-        self.max_expressions_per_objective = 5
+        self.max_expressions_per_objective = 20
         self.discrete_var_domain_size = 5
 
     def sample_coefficient(self):
@@ -152,6 +152,7 @@ class PseudoBooleanOptimizationToWeightedConstraintSatisfactionProblem:
         assert expression_obj.variables.size == var_values.size
 
         expression_val = 1.0
+
         for curr_var_idx in range(expression_obj.variables.size):
             curr_var_val = var_values[curr_var_idx]
             curr_var_func = expression_obj.functions[curr_var_idx]

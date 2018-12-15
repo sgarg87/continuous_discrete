@@ -2,6 +2,7 @@ import numpy as np
 import scipy.optimize as so
 import sys
 import time
+import numpy.random as npr
 
 
 class ConstraintsCompositeGraphToLinearProgram:
@@ -64,36 +65,63 @@ class ConstraintsCompositeGraphToLinearProgram:
 
         return vertex_weights, edge_vertices
 
-    def solve_lp(self, vertex_weights, edge_vertices):
+    def solve_lp(self, vertex_weights, edge_vertices, lp_method):
+
+        # vertex_weights = npr.randn(vertex_weights.size)
+        # vertex_weights = np.zeros(vertex_weights.size)
+        # vertex_weights[[1, 2, 3]] = 1.0
+        print '-----------------------------------'
+        print '-----------------------------------'
+        # vertex_weights /= 10.0
+        # vertex_weights += npr.randn(vertex_weights.size)
+        print 'vertex_weights', vertex_weights[1:]
 
         num_vertices = vertex_weights.size-1
         num_edges = edge_vertices.shape[0]
+        print '-----------------------------------'
+        print '(v: {}, e: {})'.format(num_vertices, num_edges)
 
         A = np.zeros((num_edges, num_vertices))
-
         for curr_idx in xrange(num_edges):
             edge = edge_vertices[curr_idx]
-            A[curr_idx, (edge-1)] = -1
+            A[curr_idx, (edge-1)] = -1.0
+        print '-----------------------------------'
+        print 'A.shape', A.shape
+        print 'A', A
 
-        b = -1*np.ones(num_edges)
+        b = -1.0*np.ones(num_edges)
+        print '-----------------------------------'
+        print 'b.shape', b.shape
+        print 'b', b
 
         start_time = time.time()
+        print '-----------------------------------'
         print 'Solving the linear program ...'
         res = so.linprog(
                     c=vertex_weights[1:],
                     A_ub=A,
                     b_ub=b,
-                    options={"disp": True},
-                    bounds=(0.0, 1.0)
+                    options={"disp": True, 'maxiter': 10000},
+                    # bounds=(0.0, 1.0),
+                    method=lp_method,
             )
         print 'Time to solve the program {}'.format(time.time() - start_time)
+        print '-----------------------------------'
+        print '-----------------------------------'
 
-        return res
+        fun = res['fun']
+        x = res['x']
+
+        return res, fun, x
 
     def main(self, file_path):
 
         vertex_weights, edge_vertices = self.read_ccg(file_path=file_path)
-        res = self.solve_lp(vertex_weights, edge_vertices)
+
+        # res, fun, x = self.solve_lp(vertex_weights, edge_vertices, lp_method='simplex')
+        # print res
+
+        res, fun, x = self.solve_lp(vertex_weights, edge_vertices, lp_method='interior-point')
         print res
 
 
